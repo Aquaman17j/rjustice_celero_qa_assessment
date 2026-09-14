@@ -89,7 +89,7 @@ Both automated negative cases currently pass. Tightend to check the outcome the 
 
 ## Viewing failures (screenshots & traces)
 
-Adde `screenshot: 'only-on-failure'` into `playwright.config.ts` based on my runs I nticed it was already doing so but being explict about it in the config does feel a bit more reliable, After a run you can open the HTML report with the command below:
+Added `screenshot: 'only-on-failure'` into `playwright.config.ts` based on my runs I noticed it was already doing so but being explict about it in the config does feel a bit more reliable, After a run you can open the HTML report with the command below:
 
 ```bash
 npx playwright show-report
