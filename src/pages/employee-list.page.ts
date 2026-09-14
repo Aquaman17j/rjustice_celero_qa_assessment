@@ -68,12 +68,6 @@ export class EmployeeListPage extends BasePage {
     await this.waitForLoader();
   }
  
-  async expectRowContaining(text: string): Promise<void> {
-    await expect(this.resultRows.filter({ hasText: text }).first()).toBeVisible({
-      timeout: TIMEOUTS.DEFAULT,
-    });
-  }
- 
   /**
    * Exactly one result row, and it contains every expected value.
    */

@@ -7,7 +7,6 @@ test.describe('Add Employee', () => {
   });
   test('TC-01 — creates an employee with required fields only @smoke', async ({
     addEmployeePage,
-    employeeListPage,
     createdEmployeeIds,
   }) => {
     const employee = newEmployee();
@@ -23,15 +22,13 @@ test.describe('Add Employee', () => {
     await addEmployeePage.expectSaveSuccess();
     await addEmployeePage.expectRedirectedToNewEmployee();
 
-    // Registered as soon as the record demonstrably exists, so teardown still
-    // runs if the Employee List assertion below fails.
     createdEmployeeIds.push(assignedId);
 
     expect(addEmployeePage.employeeNumberFromUrl()).not.toBeNull();
 
-    await employeeListPage.goto();
-    await employeeListPage.searchByEmployeeId(assignedId);
-    await employeeListPage.expectRowContaining(employee.lastName);
+    // Remove the code for looking up the newly created employee as this 
+    // is already handkled in TC-02
+    //using it as a means to determine the pass of this test is redundant 
   });
 
 
@@ -45,6 +42,7 @@ test.describe('Add Employee', () => {
 
   test('TC-05 — rejects a duplicate Employee Id', async ({
     addEmployeePage,
+    employeeListPage,
     createdEmployeeIds,
   }) => {
     const first = newEmployee();
@@ -63,5 +61,11 @@ test.describe('Add Employee', () => {
 
     await addEmployeePage.expectDuplicateEmployeeIdError();
     await addEmployeePage.expectStillOnForm();
+
+    // The outcome that actually matters: the Id still resolves to exactly one
+    // record, and it's the original -- not just that a toast was shown.
+    await employeeListPage.goto();
+    await employeeListPage.searchByEmployeeId(assignedId);
+    await employeeListPage.expectExactlyOneRowMatching([first.lastName]);
   });
 });

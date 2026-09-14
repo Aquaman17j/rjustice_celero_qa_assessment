@@ -72,10 +72,12 @@ export class AddEmployeePage extends BasePage {
   async expectStillOnForm(): Promise<void> {
     await expect(this.page).toHaveURL(/\/pim\/addEmployee/);
   }
-
+  // Tighten this expect to account for both the error messages on 
+  // the first and Last name input fileds
   async expectRequiredFieldErrors(): Promise<void> {
-    await expect(this.errorMessages.first()).toBeVisible();
-    await expect(this.errorMessages.first()).toHaveText(MESSAGES.REQUIRED);
+    await expect(this.errorMessages).toHaveCount(2);
+    await expect(this.errorMessages.nth(0)).toHaveText(MESSAGES.REQUIRED);
+    await expect(this.errorMessages.nth(1)).toHaveText(MESSAGES.REQUIRED);
   }
 
   async expectDuplicateEmployeeIdError(): Promise<void> {
