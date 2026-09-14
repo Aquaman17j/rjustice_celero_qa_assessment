@@ -29,7 +29,7 @@ export class AddEmployeePage extends BasePage {
     return this.page.getByRole('button', { name: 'Save' });
   }
   /**
-   * Instead of focusing on one error message per decided to locate it by the locator for any error that may show on the add employee form
+   * Instead of focusing on one error message per input decided to locate it by the locator for any error that may show on the add employee form
    */
   get errorMessages(): Locator {
     return this.page.locator('.oxd-input-field-error-message');

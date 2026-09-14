@@ -172,9 +172,9 @@ TC-04. Attempt to save in turn with:
   record is created.
 - The 10-character numeric, alphanumeric, symbol, and whitespace-padded IDs are
   all accepted.
-- Confirm whether the whitespace-padded ID retains its spaces once stored. If it
-  does, ` 1234 ` and `1234` are distinct IDs that are identical to any human or
-  downstream system, which undermines the uniqueness rule in TC-05.
+- Confirmed the whitespace-padded ID retains its spaces once stored ` 1234 ` and `1234` can
+  both be stored as separate records despite looking identical to any human or downstream
+  system, which undermines the uniqueness rule in TC-05.
 
 > **Observation:** the field's `maxlength` is `-1`, so the browser imposes no
 > limit, but the application rejects 11 characters on submit. The limit exists
