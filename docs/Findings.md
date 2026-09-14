@@ -31,3 +31,24 @@ The application enforces that Employee Id is unique. But the field accepts free-
 length, character restriction, or format hint. Maximum limit is only stated when more than 10 characters are placed into the input box, inspecting the input box properties it states the it's maxLength = -1
 
 ---
+
+## 4. Save success is reported before the record is verifiable
+
+**Type:** Risk · **Severity:** Low–Medium · **Found:** building the automated flow
+
+The success toast and the redirect to the employee's Personal Details page occur
+promptly, but a subsequent Employee List search for the same record can need a
+short retry window before the row appears.
+
+---
+
+## 5. Coverage gap: role-based access is untested
+
+**Type:** Risk / coverage gap · **Severity:** Noted, not measured
+
+All testing here used an administrator account. It needs a
+second account that the assignment did not supply.
+
+Flagging it because "admin can do X" says nothing about whether "non-admin
+cannot do X", and for a personal-data module the second question is the one with
+real consequences. 
