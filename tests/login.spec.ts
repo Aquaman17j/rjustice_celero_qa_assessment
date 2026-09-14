@@ -1,11 +1,16 @@
-import { test, expect } from '@playwright/test';
-
-test('TC-07 — rejects invalid credentials', async ({ page }) => {
-  await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
-  await page.getByRole('textbox', { name: 'Username' }).click();
-  await page.getByRole('textbox', { name: 'Username' }).fill('fakeuser');
-  await page.getByRole('textbox', { name: 'Username' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Password' }).fill('fakepass');
-  await page.getByRole('textbox', { name: 'Password' }).press('Enter');
-  await page.getByText('Invalid credentials').click();
+import { test } from '../src/fixtures/test.fixtures';
+ 
+test.use({ storageState: { cookies: [], origins: [] } });
+test.describe('Login', () => {
+  test('TC-07 — rejects invalid credentials', async ({ loginPage }) => {
+    await loginPage.goto();
+ 
+    await loginPage.login('not-a-real-user', 'not-a-real-password');
+ 
+    await loginPage.expectInvalidCredentials();
+    await loginPage.expectOnLoginPage();
+  });
 });
+ 
+
+

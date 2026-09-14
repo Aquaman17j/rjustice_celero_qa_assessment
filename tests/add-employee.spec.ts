@@ -1,56 +1,67 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '../src/fixtures/test.fixtures';
+import { newEmployee } from '../src/utils/data';
 
-test('TC-01 — creates an employee with required fields only', async ({ page }) => {
-  await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
-  await page.getByRole('textbox', { name: 'Username' }).click();
-  await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
-  await page.getByRole('textbox', { name: 'Username' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Password' }).fill('admin123');
-  await page.getByRole('button', { name: 'Login' }).click();
-  await page.getByRole('link', { name: 'PIM' }).click();
-  await page.getByRole('button', { name: ' Add' }).click();
-  await page.getByRole('textbox', { name: 'First Name' }).click();
-  await page.getByRole('textbox', { name: 'First Name' }).fill('test');
-  await page.getByRole('textbox', { name: 'Last Name' }).click();
-  await page.getByRole('textbox', { name: 'Last Name' }).fill('user123');
-  await page.getByRole('button', { name: 'Save' }).click();
-});
+test.describe('Add Employee', () => {
+  test.beforeEach(async ({ addEmployeePage }) => {
+    await addEmployeePage.goto();
+  });
+  test('TC-01 — creates an employee with required fields only @smoke', async ({
+    addEmployeePage,
+    employeeListPage,
+    createdEmployeeIds,
+  }) => {
+    const employee = newEmployee();
 
-test('TC-04 — rejects a save with no first or last name', async ({ page }) => {
-  await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
-  await page.getByRole('textbox', { name: 'Username' }).click();
-  await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
-  await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill('admin123');
-  await page.getByRole('textbox', { name: 'Password' }).press('Enter');
-  await page.getByRole('link', { name: 'PIM' }).click();
-  await page.getByRole('button', { name: ' Add' }).click();
-  await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByText('Required').first()).toBeVisible();
-  await page.getByText('Required').nth(1).click();
-  await expect(page.getByText('Required').nth(1)).toBeVisible();
-});
+    await addEmployeePage.fillEmployee(employee);
 
-test('TC-05 — rejects a duplicate Employee Id', async ({ page }) => {
-  await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
-  await page.getByRole('textbox', { name: 'Username' }).click();
-  await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
-  await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill('admin123');
-  await page.getByRole('button', { name: 'Login' }).click();
-  await page.getByRole('link', { name: 'PIM' }).click();
-  await page.getByRole('button', { name: ' Add' }).click();
-  await page.getByRole('textbox', { name: 'First Name' }).click();
-  await page.getByRole('textbox', { name: 'First Name' }).fill('test');
-  await page.getByRole('textbox', { name: 'Last Name' }).click();
-  await page.getByRole('textbox', { name: 'Last Name' }).fill('123');
-  await page.getByRole('button', { name: 'Save' }).click();
-  await page.getByRole('link', { name: 'PIM' }).click();
-  await page.getByRole('button', { name: ' Add' }).click();
-  await page.getByRole('textbox', { name: 'First Name' }).click();
-  await page.getByRole('textbox', { name: 'First Name' }).fill('test');
-  await page.getByRole('textbox', { name: 'First Name' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Middle Name' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Last Name' }).fill('1234');
-  await expect(page.getByText('Employee Id already exists')).toBeVisible();
+    // Capture before saving -- the field is gone once the form submits.
+    const assignedId = await addEmployeePage.readEmployeeId();
+    expect(assignedId, 'the form should pre-fill an Employee Id').not.toBe('');
+
+    await addEmployeePage.save();
+
+    await addEmployeePage.expectSaveSuccess();
+    await addEmployeePage.expectRedirectedToNewEmployee();
+
+    // Registered as soon as the record demonstrably exists, so teardown still
+    // runs if the Employee List assertion below fails.
+    createdEmployeeIds.push(assignedId);
+
+    expect(addEmployeePage.employeeNumberFromUrl()).not.toBeNull();
+
+    await employeeListPage.goto();
+    await employeeListPage.searchByEmployeeId(assignedId);
+    await employeeListPage.expectRowContaining(employee.lastName);
+  });
+
+
+  test('TC-04 — rejects a save with no first or last name', async ({ addEmployeePage }) => {
+    await addEmployeePage.save();
+
+    await addEmployeePage.expectRequiredFieldErrors();
+    await addEmployeePage.expectStillOnForm();
+  });
+
+
+  test('TC-05 — rejects a duplicate Employee Id', async ({
+    addEmployeePage,
+    createdEmployeeIds,
+  }) => {
+    const first = newEmployee();
+    await addEmployeePage.fillEmployee(first);
+
+    const assignedId = await addEmployeePage.readEmployeeId();
+    await addEmployeePage.save();
+    await addEmployeePage.expectRedirectedToNewEmployee();
+    createdEmployeeIds.push(assignedId);
+
+    // Different person, same Employee Id.
+    const duplicate = newEmployee({ employeeId: assignedId });
+    await addEmployeePage.goto();
+    await addEmployeePage.fillEmployee(duplicate);
+    await addEmployeePage.save();
+
+    await addEmployeePage.expectDuplicateEmployeeIdError();
+    await addEmployeePage.expectStillOnForm();
+  });
 });

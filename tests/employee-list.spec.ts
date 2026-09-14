@@ -1,30 +1,41 @@
-import { test, expect } from '@playwright/test';
+import { test } from '../src/fixtures/test.fixtures';
+import { fullName, newEmployee } from '../src/utils/data';
 
-test('TC-02 — finds a created employee by Employee Id and by name', async ({ page }) => {
-  await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
-  await page.getByRole('textbox', { name: 'Username' }).click();
-  await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
-  await page.getByRole('textbox', { name: 'Username' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Password' }).fill('admin123');
-  await page.getByRole('button', { name: 'Login' }).click();
-  await page.getByRole('link', { name: 'PIM' }).click();
-  await page.getByRole('textbox', { name: 'Type for hints...' }).first().click();
-  await page.getByRole('textbox', { name: 'Type for hints...' }).first().fill('');
-  await page.getByRole('button', { name: ' Add' }).click();
-  await page.getByRole('textbox', { name: 'First Name' }).click();
-  await page.getByRole('textbox', { name: 'First Name' }).fill('test');
-  await page.getByRole('textbox', { name: 'First Name' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Middle Name' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Last Name' }).fill('user12345');
-  await page.getByRole('button', { name: 'Save' }).click();
-  await page.getByRole('link', { name: 'PIM' }).click();
-  await page.getByRole('textbox').nth(2).click();
-  await page.getByRole('textbox').nth(2).fill('0446');
-  await page.getByRole('button', { name: 'Search' }).click();
-  await expect(page.getByRole('row', { name: ' 0446 test user12345  ' })).toBeVisible();
-  await page.getByRole('button', { name: 'Reset' }).click();
-  await page.getByRole('textbox', { name: 'Type for hints...' }).first().click();
-  await page.getByRole('textbox', { name: 'Type for hints...' }).first().fill('Test user12345');
-  await page.getByRole('button', { name: 'Search' }).click();
-  await expect(page.getByRole('row', { name: ' 0446 test user12345  ' })).toBeVisible();
+test.describe('Employee List', () => {
+
+  test('TC-02 — finds a created employee by Employee Id and by name', async ({
+    addEmployeePage,
+    employeeListPage,
+    createdEmployeeIds,
+  }) => {
+    // Same shape TC-01 creates: required fields only, pre-filled Employee Id.
+    const employee = newEmployee();
+
+    await addEmployeePage.goto();
+    await addEmployeePage.fillEmployee(employee);
+    const assignedId = await addEmployeePage.readEmployeeId();
+    await addEmployeePage.save();
+    await addEmployeePage.expectRedirectedToNewEmployee();
+    createdEmployeeIds.push(assignedId);
+
+    await employeeListPage.goto();
+
+    // Search by Employee Id. Assert on the name, not the id typed into the
+    // filter -- confirming the value you just entered proves nothing.
+    await employeeListPage.searchByEmployeeId(assignedId);
+    await employeeListPage.expectExactlyOneRowMatching([
+      employee.firstName,
+      employee.lastName,
+    ]);
+
+    // Reset, then search by Employee Name via the autocomplete.
+    await employeeListPage.reset();
+    await employeeListPage.selectEmployeeName(fullName(employee));
+    await employeeListPage.search();
+    await employeeListPage.expectExactlyOneRowMatching([
+      employee.firstName,
+      employee.lastName,
+      assignedId,
+    ]);
+  });
 });
