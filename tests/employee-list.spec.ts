@@ -1,0 +1,30 @@
+import { test, expect } from '@playwright/test';
+
+test('test', async ({ page }) => {
+  await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+  await page.getByRole('textbox', { name: 'Username' }).click();
+  await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
+  await page.getByRole('textbox', { name: 'Username' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Password' }).fill('admin123');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.getByRole('link', { name: 'PIM' }).click();
+  await page.getByRole('textbox', { name: 'Type for hints...' }).first().click();
+  await page.getByRole('textbox', { name: 'Type for hints...' }).first().fill('');
+  await page.getByRole('button', { name: ' Add' }).click();
+  await page.getByRole('textbox', { name: 'First Name' }).click();
+  await page.getByRole('textbox', { name: 'First Name' }).fill('test');
+  await page.getByRole('textbox', { name: 'First Name' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Middle Name' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Last Name' }).fill('user12345');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('link', { name: 'PIM' }).click();
+  await page.getByRole('textbox').nth(2).click();
+  await page.getByRole('textbox').nth(2).fill('0446');
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect(page.getByRole('row', { name: ' 0446 test user12345  ' })).toBeVisible();
+  await page.getByRole('button', { name: 'Reset' }).click();
+  await page.getByRole('textbox', { name: 'Type for hints...' }).first().click();
+  await page.getByRole('textbox', { name: 'Type for hints...' }).first().fill('Test user12345');
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect(page.getByRole('row', { name: ' 0446 test user12345  ' })).toBeVisible();
+});
