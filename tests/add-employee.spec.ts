@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('Create an employee with required fields only', async ({ page }) => {
+test('TC-01 — creates an employee with required fields only', async ({ page }) => {
   await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
   await page.getByRole('textbox', { name: 'Username' }).click();
   await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
@@ -16,7 +16,7 @@ test('Create an employee with required fields only', async ({ page }) => {
   await page.getByRole('button', { name: 'Save' }).click();
 });
 
-test('Save is rejected when required fields are empty', async ({ page }) => {
+test('TC-04 — rejects a save with no first or last name', async ({ page }) => {
   await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
   await page.getByRole('textbox', { name: 'Username' }).click();
   await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
@@ -31,7 +31,7 @@ test('Save is rejected when required fields are empty', async ({ page }) => {
   await expect(page.getByText('Required').nth(1)).toBeVisible();
 });
 
-test('Duplicate Employee ID is rejected', async ({ page }) => {
+test('TC-05 — rejects a duplicate Employee Id', async ({ page }) => {
   await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
   await page.getByRole('textbox', { name: 'Username' }).click();
   await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
